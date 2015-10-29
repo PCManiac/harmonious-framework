@@ -791,8 +791,6 @@
                         || $error['type'] == E_COMPILE_ERROR
                         || $error['type'] == E_CORE_ERROR)
                     {
-                        ob_end_clean();	// сбросить буфер, завершить работу буфера
-
                         if (isset($this)) {
                             $this->getLog()->error('Fatal Error Catched: '.$error['message']);
                             if ( $this->config('debug') === true ) {
@@ -805,8 +803,10 @@
                             throw new Exception('Fatal Error Catched but not logged: ' . $error['message']);
                         }
                     } else {
+                        if (isset($this)) {
+                            $this->getLog()->warn('Shutdown Error Catched: '.$error['message']);
+                        }
                     }
-                } else {
                 }
         }
         
