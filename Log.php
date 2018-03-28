@@ -1,36 +1,5 @@
 <?php
 /**
- * Slim - a micro PHP 5 framework
- *
- * @author      Josh Lockhart <info@joshlockhart.com>
- * @copyright   2011 Josh Lockhart
- * @link        http://www.slimframework.com
- * @license     http://www.slimframework.com/license
- * @version     1.5.0
- *
- * MIT LICENSE
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
-/**
  * Log Adapter
  *
  * This is an adapter for your own custom Logger. This adapter assumes
@@ -45,9 +14,7 @@
  * This class assumes nothing else about your custom Logger, so you are free
  * to use Apache's Log4PHP logger or any other log class that, at the
  * very least, implements the five public instance methods shown above.
- *
- * @package Slim
- * @author  Josh Lockhart <info@joshlockhart.com>
+ 
  * @since   Version 1.0
  */
 class Harmonious_Log {
@@ -93,23 +60,25 @@ class Harmonious_Log {
     public function __call($name, $args) {
         if ($this->isEnabled()) {
             $name = strtolower($name);
+            $object = $args[0];
+            
             $result = true;
             foreach ($this->loggers as $logger) {
                 switch ($name) {
                     case 'debug':
-                        if (!$logger->debug($args)) $result = false;
+                        if (!$logger->debug($object)) $result = false;
                         break;
                     case 'info':
-                        if (!$logger->info($args)) $result = false;
+                        if (!$logger->info($object)) $result = false;
                         break;
                     case 'warn':
-                        if (!$logger->warn($args)) $result = false;
+                        if (!$logger->warn($object)) $result = false;
                         break;
                     case 'error':
-                        if (!$logger->error($args)) $result = false;
+                        if (!$logger->error($object)) $result = false;
                         break;
                     case 'fatal':
-                        if (!$logger->fatal($args)) $result = false;
+                        if (!$logger->fatal($object)) $result = false;
                         break;
                     default:
                         return false;

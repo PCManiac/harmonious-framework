@@ -2,14 +2,9 @@
 /**
  * Logger
  *
- * A simple Logger that writes to a daily-unique log file in
- * a user-specified directory. By default, this class will write log
- * messages for all log levels; the log level may be changed to filter
- * unwanted log messages from the log file.
-
  * @since   Version 1.0
  */
-class Harmonious_Logger {
+class Harmonious_Json_Logger {
 
     /**
      * @var array Log levels
@@ -150,14 +145,12 @@ class Harmonious_Logger {
         if ( !is_writable($dir) ) {
             throw new RuntimeException("Log directory '$dir' not writable.");
         }
+        
+        $data['error_level_int'] = $level;
+        $data['error_level'] = $this->levels[$level];
+        
         if ( $level <= $this->getLevel() ) {
-            if (is_string($data)) $message = $data;
-            elseif (isset($data['message'])) $message = (string)$data['message'];
-            else {
-                reset($data);
-                $message = (string)current($data);
-            }
-            $this->write(sprintf("[%s] %s - %s\r\n", $this->levels[$level], date('c'), $message));
+            $this->write(json_encode($data));
         }
     }
 
