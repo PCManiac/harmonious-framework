@@ -151,11 +151,15 @@ class Harmonious_Logger {
             throw new RuntimeException("Log directory '$dir' not writable.");
         }
         if ( $level <= $this->getLevel() ) {
-            if (is_string($data)) $message = $data;
-            elseif (isset($data['message'])) $message = (string)$data['message'];
-            else {
-                reset($data);
-                $message = (string)current($data);
+            if (is_object($data)) $data = (array)$data;
+            if (is_array($data)) {
+                if (isset($data['message'])) $message = (string)$data['message'];
+                else {
+                    reset($data);
+                    $message = (string)current($data);    
+                }
+            } else {
+                $message = (string)$data;  
             }
             $this->write(sprintf("[%s] %s - %s\r\n", $this->levels[$level], date('c'), $message));
         }

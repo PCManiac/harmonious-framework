@@ -146,11 +146,20 @@ class Harmonious_Json_Logger {
             throw new RuntimeException("Log directory '$dir' not writable.");
         }
         
-        $data['error_level_int'] = $level;
-        $data['error_level'] = $this->levels[$level];
+        if (is_array($data)) {
+            $object = $data;
+        } elseif (is_object($data)) {
+            $object = (array)$data;
+        } else {
+            $object = array();
+            $object['text'] = (string)$data;
+        }
+        $object['error_level_int'] = $level;
+        $object['error_level'] = $this->levels[$level];    
+        $object['time'] = date('c');
         
         if ( $level <= $this->getLevel() ) {
-            $this->write(json_encode($data));
+            $this->write(json_encode($object)."\n");
         }
     }
 
