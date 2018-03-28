@@ -24,11 +24,11 @@
     }
 
     spl_autoload_register(array('Harmonious', 'autoloader'));
-         
+
     class Harmonious
     {
         protected $template_params = array();
-        protected $components;        
+        protected $components;
         protected $request;
         protected $response;
         protected $view;
@@ -46,13 +46,13 @@
             'error.500' => array(array()),
             'error.halt' => array(array())
         );
-        
+
         /**
          * Constructor
          * @param   array $userSettings
          * @return  void
          */
-        public function __construct( $userSettings = array() ) {            
+        public function __construct( $userSettings = array() ) {
             //Merge application settings
             $this->settings = array_merge(array(
                 //Mode
@@ -91,7 +91,7 @@
             $this->getMode();
 
             $this->components = new Harmonious_Components_Factory($this);
-            
+
             //Setup HTTP request and response handling
             $this->request = $this->components['request'];
             $this->response = $this->components['response'];;
@@ -109,7 +109,7 @@
                 if ( $sessionHandler instanceof Harmonious_Session_Handler ) {
                     $sessionHandler->register($this);
                 }
-                session_cache_limiter(false); 
+                session_cache_limiter(false);
                 session_start();
             }
 
@@ -120,25 +120,28 @@
             set_error_handler(array('Harmonious', 'handleErrors'));
 
             //set_exception_handler(array('Harmonious', 'handleExceptions'));
-            
+
             register_shutdown_function(array($this, 'FatalErrorCatcher'));
         }
-   
+
         /**
          * Run the Harmonious application
          * @return void
          */
         public function run() {
             try {
-                try {            
+                try {
                     $this->applyHook('app.before', $this);
                     ob_start();
-                    $this->applyHook('app.before.router', $this);
                     $httpMethod = $this->request->getMethod();
                     $uri = rtrim($this->request->getResourceUri(), "/");
                     if ($uri == '') $uri = '/index';
                     $controller_name = $this->config('controller_path') . $uri . "_controller.php";
                     $controller_class_name = substr($uri, strrpos($uri, '/') + 1) . "Controller";
+                    $controller_class_name = str_replace('.', '_', $controller_class_name);
+                    $hook_responce = $this->applyHook('app.before.router', array($this, $controller_name, $controller_class_name));
+                    $controller_name = $hook_responce[1];
+                    $controller_class_name = $hook_responce[2];
                     if (file_exists($controller_name)) {
                         include ($controller_name);
                         //создать экземпляр класса и проверить поддерживается ли http метод, если нет - ошибка 405
@@ -169,13 +172,13 @@
             } catch ( Slim_Exception_Stop $e ) {
                 //Exit application context
             }
-        }    
-        
+        }
+
         /**
          * "Магические" методы для работы с компонентами Harmonious.
          * http://www.php.net/manual/ru/language.oop5.magic.php
-         * 
-         * Возвращает компонент Harmonious из фабрики. 
+         *
+         * Возвращает компонент Harmonious из фабрики.
          * @param type $name - Имя компонента
          * @return type      - объект(компонент Harmonious)
          */
@@ -183,7 +186,7 @@
             if ($name == 'components') return $this->components;
             return $this->components[$name];
         }
-        
+
         /**
          * Добавляет компонент в фабрику
          * @param type $name    - имя компонента
@@ -193,22 +196,22 @@
         {
             $this->components[$name] = $value;
         }
-        
+
         /****** Параметры шаблона ******/
-        
+
         /**
          * Глобальный массив параметров шаблона используется для наполнения шаблона параметрами из различных
          * участков кода. Например, часть параметров может быть передана посредством хука, а остальные посредством
          * контроллена. См. также метод render, в котором этот глобальные массив объединяется с переданным перед
          * передачей в шаблон.
-         * 
+         *
          * Объединяет два массива: переданный в параметре и глобальный массив параметров шаблона
-         * @param type $array 
+         * @param type $array
          */
         public function addTemplateParam($array) {
             $this->template_params = array_merge($this->template_params, $array);
         }
-        
+
         /**
          * Чистит глобальный массив параметров шаблона
          */
@@ -216,15 +219,15 @@
             unset($this->template_params);
             $this->template_params = array();
         }
-                
+
         /**
          * Возвращает глобальный массив параметров шаблона
-         * @return type 
+         * @return type
          */
         public function getTemplateParams() {
             return $this->template_params;
         }
-        
+
         /**
          * Render a template
          * @param   string  $template   The name of the template passed into the View::render method
@@ -237,8 +240,8 @@
             $data = array_merge($this->template_params, $data);
             $this->view->appendData($data);
             $this->view->display($template);
-        }     
-        
+        }
+
         /**
          * Render a template
          * @param   string  $template   The name of the template passed into the View::render method
@@ -251,8 +254,8 @@
             $data = array_merge($this->template_params, $data);
             $this->view->appendData($data);
             return $this->view->fetch($template);
-        }   
-        
+        }
+
         /**
          * Harmonious auto-loader
          * Этот метод производит загрузку файлов с классами при первом обращении к ним. Грузит свои классы и классы Slim-а
@@ -260,19 +263,19 @@
          */
         public static function autoloader( $className ) {
             $className = str_replace('Slim', 'Harmonious', $className);
-            
+
             if ( strpos($className, 'Harmonious') !== 0 ) {
                 return;
             }
             $file = dirname(__FILE__) . '/' . str_replace('_', DIRECTORY_SEPARATOR, substr($className, 11)) . '.php';
-            
+
             if ( file_exists($file) ) {
                 require $file;
             }
         }
-        
-        
-        /***** CONFIGURATION *****/        
+
+
+        /***** CONFIGURATION *****/
         /**
          * Get application mode
          * @return string
@@ -285,7 +288,7 @@
         }
         return $this->mode;
         }
-        
+
         /**
          * Configure Slim for a given mode
          *
@@ -330,27 +333,27 @@
             } else {
                 $this->settings[$name] = $value;
             }
-        }            
-        
+        }
+
         /***** LOGGING *****/
 
         /**
          * Get application Log (lazy-loaded)
-         * @return Slim_Log
+         * @return Harmonious_Log
          */
         public function getLog() {
             if ( !isset($this->log) ) {
-                $this->log = new Slim_Log();
+                $this->log = new Harmonious_Log();
                 $this->log->setEnabled($this->config('log.enable'));
                 $logger = $this->config('log.logger');
                 if ( $logger ) {
                     $this->log->setLogger($logger);
                 } else {
-                    $this->log->setLogger(new Slim_Logger($this->config('log.path'), $this->config('log.level')));
+                    $this->log->setLogger(new Harmonious_Logger($this->config('log.path'), $this->config('log.level')));
                 }
             }
             return $this->log;
-        }      
+        }
 
         /**
          * Not Found Handler
@@ -374,7 +377,7 @@
                 $this->halt(500, ob_get_clean());
         }
 
-        /***** ACCESSORS *****/        
+        /***** ACCESSORS *****/
         /**
          * Get and/or set the View
          *
@@ -668,8 +671,8 @@
             } else {
                 throw new InvalidArgumentException('Slim::redirect only accepts HTTP 300-307 status codes.');
             }
-        }  
-        
+        }
+
         /***** HOOKS *****/
 
         /**
@@ -706,7 +709,8 @@
                 foreach( $this->hooks[$name] as $priority ) {
                     if( !empty($priority) ) {
                         foreach($priority as $callable) {
-                            $hookArg = call_user_func($callable, $hookArg);
+                            if (is_array($hookArg)) $hookArg = call_user_func_array($callable, $hookArg);
+                            else $hookArg = call_user_func($callable, $hookArg);
                         }
                     }
                 }
@@ -770,6 +774,8 @@
          * @throws  ErrorException
          */
         public static function handleErrors( $errno, $errstr = '', $errfile = '', $errline = '' ) {
+            if (isset($this)) $this->getLog()->error('handleErrors catched: '.$errstr);
+
             if ( error_reporting() & $errno ) {
                 if (isset($this)) $this->getLog()->error('Unhandled Error: '.$errstr);
                 throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
@@ -781,7 +787,7 @@
             $this->getLog()->error('Unhandled Exception: '.$exception->getMessage());
             throw $exception;
         }
-        
+
         public function FatalErrorCatcher()
             {
                 $error = error_get_last();
@@ -809,7 +815,7 @@
                     }
                 }
         }
-        
+
         /**
          * Generate markup for error message
          *
@@ -866,6 +872,6 @@
         protected function defaultError() {
             echo self::generateTemplateMarkup('Error', '<p>A website error has occured. The website administrator has been notified of the issue. Sorry for the temporary inconvenience.</p>');
         }
-        
-    }        
+
+    }
 ?>

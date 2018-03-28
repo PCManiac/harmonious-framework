@@ -42,7 +42,7 @@
  * @author  Josh Lockhart <info@joshlockhart.com>
  * @since   Version 1.0
  */
-class Slim_Logger {
+class Harmonious_Logger {
 
     /**
      * @var array Log levels
@@ -184,7 +184,7 @@ class Slim_Logger {
             throw new RuntimeException("Log directory '$dir' not writable.");
         }
         if ( $level <= $this->getLevel() ) {
-            $this->write(sprintf("[%s] %s - %s\r\n", $this->levels[$level], date('c'), (string)$data));
+            $this->write(sprintf("[%s] %s - %s\r\n", $this->levels[$level], date('c'), (string)$data[0]));
         }
     }
 

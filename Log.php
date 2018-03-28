@@ -50,12 +50,12 @@
  * @author  Josh Lockhart <info@joshlockhart.com>
  * @since   Version 1.0
  */
-class Slim_Log {
+class Harmonious_Log {
 
     /**
      * @var mixed An object that implements expected Logger interface
      */
-    protected $logger;
+    protected $loggers = array();
 
     /**
      * @var bool Enable logging?
@@ -90,66 +90,51 @@ class Slim_Log {
         return $this->enabled;
     }
 
-    /**
-     * Log debug message
-     * @param   mixed           $object
-     * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
-     */
-    public function debug( $object ) {
-        return isset($this->logger) && $this->isEnabled() ? $this->logger->debug($object) : false;
+    public function __call($name, $args) {
+        if ($this->isEnabled()) {
+            $name = strtolower($name);
+            $result = true;
+            foreach ($this->loggers as $logger) {
+                switch ($name) {
+                    case 'debug':
+                        if (!$logger->debug($args)) $result = false;
+                        break;
+                    case 'info':
+                        if (!$logger->info($args)) $result = false;
+                        break;
+                    case 'warn':
+                        if (!$logger->warn($args)) $result = false;
+                        break;
+                    case 'error':
+                        if (!$logger->error($args)) $result = false;
+                        break;
+                    case 'fatal':
+                        if (!$logger->fatal($args)) $result = false;
+                        break;
+                    default:
+                        return false;
+                        break;
+                }  
+            }
+            return $result;
+        } else return false;
     }
-
-    /**
-     * Log info message
-     * @param   mixed           $object
-     * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
-     */
-    public function info( $object ) {
-        return isset($this->logger) && $this->isEnabled() ? $this->logger->info($object) : false;
-    }
-
-    /**
-     * Log warn message
-     * @param   mixed           $object
-     * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
-     */
-    public function warn( $object ) {
-        return isset($this->logger) && $this->isEnabled() ? $this->logger->warn($object) : false;
-    }
-
-    /**
-     * Log error message
-     * @param   mixed           $object
-     * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
-     */
-    public function error( $object ) {
-        return isset($this->logger) && $this->isEnabled() ? $this->logger->error($object) : false;
-    }
-
-    /**
-     * Log fatal message
-     * @param   mixed           $object
-     * @return  mixed|false     What the Logger returns, or false if Logger not set or not enabled
-     */
-    public function fatal( $object ) {
-        return isset($this->logger) && $this->isEnabled() ? $this->logger->fatal($object) : false;
-    }
-
+    
     /**
      * Set Logger
      * @param   mixed   $logger
      * @return  void
      */
     public function setLogger( $logger ) {
-        $this->logger = $logger;
+        $this->loggers[] = $logger;
     }
 
     /**
      * Get Logger
      * @return mixed
      */
-    public function getLogger() {
-        return $this->logger;
+    public function getLoggers() {
+        return $this->loggers;
     }
 
 }

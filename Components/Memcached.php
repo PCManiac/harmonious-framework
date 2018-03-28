@@ -37,12 +37,12 @@ class Harmonious_Components_Memcached implements IHarmonious_Component{
         function get($key, $usecas = false) {
                 $m = $this->get_server($key);
                 if (!$usecas) $ret = $m->get($key);
-                else $ret = $m->get($key, null, $cas);    
+                else $ret = $m->get($key, null, Memcached::GET_EXTENDED);    
                 if ($ret === false) $retcode = $m->getResultCode();
                 unset($m);
                 if ($ret === false) return array ('result'=>false, 'result_code'=>$retcode, 'result_string'=>$this->retcode2string($retcode));
-                $ret = array ('result'=>true, 'value'=>$ret);
-                if ($usecas) $ret['cas'] = $cas;
+                if (!$usecas) $ret = array ('result'=>true, 'value'=>$ret);
+                else $ret = array ('result'=>true, 'value'=>$ret, 'cas'=>$ret['cas']);
                 return $ret;
         }
         
