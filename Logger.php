@@ -14,6 +14,8 @@ class Harmonious_Logger {
     /**
      * @var array Log levels
      */
+    protected $app;
+    
     protected $levels = array(
         0 => 'FATAL',
         1 => 'ERROR',
@@ -26,13 +28,19 @@ class Harmonious_Logger {
      * @var string Absolute path to log directory with trailing slash
      */
     protected $directory;
+    
+    protected $ignore_arrays = false;
 
     /**
      * Constructor
      * @param   string  $directory  Absolute or relative path to log directory
      * @param   int     $level      The maximum log level reported by this Logger
      */
-    public function __construct( $directory, $level = 4 ) {
+    public function __construct( $app ) {
+        $this->app = $app;
+        $directory = $app->config('log.path');
+        $level = $app->config('log.level');
+        $this->ignore_arrays = $app->config('log.ignore_arrays');
         $this->setDirectory($directory);
         $this->setLevel($level);
     }
@@ -151,10 +159,12 @@ class Harmonious_Logger {
             throw new RuntimeException("Log directory '$dir' not writable.");
         }
         if ( $level <= $this->getLevel() ) {
+            $message = '';
             if (is_object($data)) $data = (array)$data;
             if (is_array($data)) {
                 if (isset($data['message'])) $message = (string)$data['message'];
                 else {
+                    if ($this->ignore_arrays) return;
                     reset($data);
                     $message = (string)current($data);    
                 }

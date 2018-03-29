@@ -349,7 +349,7 @@
                 if ( $logger ) {
                     $this->log->setLogger($logger);
                 } else {
-                    $this->log->setLogger(new Harmonious_Logger($this->config('log.path'), $this->config('log.level')));
+                    $this->log->setLogger(new Harmonious_Logger($this));
                 }
             }
             return $this->log;
