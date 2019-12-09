@@ -121,7 +121,7 @@ class Slim_Http_CookieJar {
             }
         }
         if ( extension_loaded('mcrypt') ) {
-            $this->_cryptModule = mcrypt_module_open($this->_algorithm, '', $this->_mode, '');
+            $this->_cryptModule = @mcrypt_module_open($this->_algorithm, '', $this->_mode, '');
             if ( $this->_cryptModule === false ) {
                 throw new Exception('Error while loading mcrypt module');
             }
@@ -342,9 +342,9 @@ class Slim_Http_CookieJar {
     protected function _encrypt( $data, $key, $iv ) {
         $iv = $this->_validateIv($iv);
         $key = $this->_validateKey($key);
-        mcrypt_generic_init($this->_cryptModule, $key, $iv);
+        @mcrypt_generic_init($this->_cryptModule, $key, $iv);
         $res = @mcrypt_generic($this->_cryptModule, $data);
-        mcrypt_generic_deinit($this->_cryptModule);
+        @mcrypt_generic_deinit($this->_cryptModule);
         return $res;
     }
 
@@ -359,10 +359,10 @@ class Slim_Http_CookieJar {
     protected function _decrypt( $data, $key, $iv ) {
         $iv = $this->_validateIv($iv);
         $key = $this->_validateKey($key);
-        mcrypt_generic_init($this->_cryptModule, $key, $iv);
+        @mcrypt_generic_init($this->_cryptModule, $key, $iv);
         $decryptedData = mdecrypt_generic($this->_cryptModule, $data);
         $res = str_replace("\x0", '', $decryptedData);
-        mcrypt_generic_deinit($this->_cryptModule);
+        @mcrypt_generic_deinit($this->_cryptModule);
         return $res;
     }
 
@@ -375,7 +375,7 @@ class Slim_Http_CookieJar {
      * @return  string
      */
     protected function _validateIv($iv) {
-        $ivSize = mcrypt_enc_get_iv_size($this->_cryptModule);
+        $ivSize = @mcrypt_enc_get_iv_size($this->_cryptModule);
         if ( strlen($iv) > $ivSize ) {
             $iv = substr($iv, 0, $ivSize);
         }
@@ -391,7 +391,7 @@ class Slim_Http_CookieJar {
      * @param   string
      */
     protected function _validateKey($key) {
-        $keySize = mcrypt_enc_get_key_size($this->_cryptModule);
+        $keySize = @mcrypt_enc_get_key_size($this->_cryptModule);
         if ( strlen($key) > $keySize ) {
             $key = substr($key, 0, $keySize);
         }
