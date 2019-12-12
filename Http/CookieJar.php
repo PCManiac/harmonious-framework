@@ -120,12 +120,12 @@ class Slim_Http_CookieJar {
                 $this->_ssl = $config['enable_ssl'];
             }
         }
-        if ( extension_loaded('mcrypt') ) {
+        /*if ( extension_loaded('mcrypt') ) {
             $this->_cryptModule = @mcrypt_module_open($this->_algorithm, '', $this->_mode, '');
             if ( $this->_cryptModule === false ) {
                 throw new Exception('Error while loading mcrypt module');
             }
-        }
+        }*/
     }
 
     /**
@@ -205,7 +205,7 @@ class Slim_Http_CookieJar {
      * @param   bool    $httponly   When TRUE the cookie will be made accessible only through the HTTP protocol
      */
     public function setCookie( $cookiename, $value, $username, $expire = 0, $path = '/', $domain = '', $secure = false, $httponly = null ) {
-        $secureValue = extension_loaded('mcrypt') ? $this->_secureCookieValue($value, $username, $expire) : $value;
+        $secureValue = /*extension_loaded('mcrypt') ? $this->_secureCookieValue($value, $username, $expire) : */$value;
         $this->setClassicCookie($cookiename, $secureValue, $expire, $path, $domain, $secure, $httponly);
     }
 
@@ -236,7 +236,7 @@ class Slim_Http_CookieJar {
      */
     public function getCookieValue( $cookiename, $deleteIfInvalid = true ) {
         if ( $this->cookieExists($cookiename) ) {
-            if ( extension_loaded('mcrypt') ) {
+            /*if ( extension_loaded('mcrypt') ) {
                 $cookieValues = explode('|', $_COOKIE[$cookiename]);
                 if ( (count($cookieValues) === 4) && ($cookieValues[1] == 0 || $cookieValues[1] >= time()) ) {
                     $key = hash_hmac('sha1', $cookieValues[0] . $cookieValues[1], $this->_secret);
@@ -255,9 +255,9 @@ class Slim_Http_CookieJar {
                         return $data;
                     }
                 }
-            } else {
+            } else {*/
                 return $_COOKIE[$cookiename];
-            }
+            //}
         }
         if ( $deleteIfInvalid ) {
             $this->deleteCookie($cookiename);
